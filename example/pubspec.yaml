@@ -1,0 +1,24 @@
+name: flutter_event_limiter_example
+description: Example app demonstrating flutter_event_limiter package.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Use the package from parent directory
+  flutter_event_limiter:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^3.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
