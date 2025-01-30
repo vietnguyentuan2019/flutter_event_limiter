@@ -1,0 +1,21 @@
+# Internal marketing and SEO analysis documents
+# These files are for local development only and should NOT be published to pub.dev
+
+COMPETITOR_DEEP_ANALYSIS.md
+SEO_MARKETING_STRATEGY.md
+SEO_CHANGES_SUMMARY.md
+FINAL_MARKET_POSITION.md
+IMPLEMENTATION_COMPLETE.md
+
+# Build artifacts (DO NOT publish)
+build/
+.dart_tool/
+
+# Development/setup scripts
+*.sh
+*.bat
+
+# IDE specific
+.vscode/
+.idea/
+*.iml

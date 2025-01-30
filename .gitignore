@@ -42,3 +42,20 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Internal marketing/SEO documents (not for pub.dev)
+COMPETITOR_DEEP_ANALYSIS.md
+SEO_MARKETING_STRATEGY.md
+SEO_CHANGES_SUMMARY.md
+FINAL_MARKET_POSITION.md
+IMPLEMENTATION_COMPLETE.md
+MARKETING_FINAL.md
+MARKETING_TEMPLATES.md
+LAUNCH_CHECKLIST.md
+PERSONAL_PUBLISHER_OPTIONS.md
+PUBLISHER_VERIFICATION_GUIDE.md
+PUBLISH_SUCCESS.md
+READY_TO_LAUNCH.md
+
+# Claude Code configuration (local only)
+.claude/

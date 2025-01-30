@@ -85,7 +85,8 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
 
   void _addLog(String message) {
     setState(() {
-      _logs.insert(0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
+      _logs.insert(
+          0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
       if (_logs.length > 10) _logs.removeLast();
     });
   }
@@ -142,7 +143,8 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
                   const SizedBox(height: 8),
                   Text(
                     'Clicks: $_normalClickCount',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -186,7 +188,8 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
                   const SizedBox(height: 8),
                   Text(
                     'Clicks: $_throttledClickCount (500ms throttle)',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -217,7 +220,8 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Text(
                             _logs[index],
-                            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                            style: const TextStyle(
+                                fontFamily: 'monospace', fontSize: 12),
                           ),
                         );
                       },
@@ -261,7 +265,9 @@ class _DebounceDemoState extends State<DebounceDemo> {
         return _mockSearch(text);
       },
       onSuccess: (results) {
-        setState(() => _results..clear()..addAll(results));
+        setState(() => _results
+          ..clear()
+          ..addAll(results));
       },
       onError: (error, stack) {
         _addLog('❌ Error: $error');
@@ -282,7 +288,8 @@ class _DebounceDemoState extends State<DebounceDemo> {
 
   void _addLog(String message) {
     setState(() {
-      _logs.insert(0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
+      _logs.insert(
+          0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
       if (_logs.length > 15) _logs.removeLast();
     });
   }
@@ -290,9 +297,21 @@ class _DebounceDemoState extends State<DebounceDemo> {
   List<String> _mockSearch(String query) {
     if (query.isEmpty) return [];
     final mockData = [
-      'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry',
-      'Fig', 'Grape', 'Honeydew', 'Kiwi', 'Lemon',
-      'Mango', 'Orange', 'Papaya', 'Raspberry', 'Strawberry',
+      'Apple',
+      'Banana',
+      'Cherry',
+      'Date',
+      'Elderberry',
+      'Fig',
+      'Grape',
+      'Honeydew',
+      'Kiwi',
+      'Lemon',
+      'Mango',
+      'Orange',
+      'Papaya',
+      'Raspberry',
+      'Strawberry',
     ];
     return mockData
         .where((item) => item.toLowerCase().contains(query.toLowerCase()))
@@ -386,7 +405,8 @@ class _DebounceDemoState extends State<DebounceDemo> {
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Text(
                           _logs[index],
-                          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                          style: const TextStyle(
+                              fontFamily: 'monospace', fontSize: 12),
                         ),
                       );
                     },
@@ -415,7 +435,8 @@ class _AsyncThrottleDemoState extends State<AsyncThrottleDemo> {
 
   void _addLog(String message) {
     setState(() {
-      _logs.insert(0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
+      _logs.insert(
+          0, '${DateTime.now().toIso8601String().substring(11, 23)}: $message');
       if (_logs.length > 10) _logs.removeLast();
     });
   }
@@ -550,7 +571,8 @@ class _AsyncThrottleDemoState extends State<AsyncThrottleDemo> {
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Text(
                             _logs[index],
-                            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                            style: const TextStyle(
+                                fontFamily: 'monospace', fontSize: 12),
                           ),
                         );
                       },
