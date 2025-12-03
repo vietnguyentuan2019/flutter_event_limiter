@@ -57,5 +57,8 @@ PUBLISHER_VERIFICATION_GUIDE.md
 PUBLISH_SUCCESS.md
 READY_TO_LAUNCH.md
 
+# Development strategy (private)
+ROADMAP.md
+
 # Claude Code configuration (local only)
 .claude/
