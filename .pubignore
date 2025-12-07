@@ -1,21 +1,37 @@
-# Internal marketing and SEO analysis documents
-# These files are for local development only and should NOT be published to pub.dev
-
+# Internal documentation and development files
+BLOG_POST.md
+BUILD_AND_PUBLISH.md
 COMPETITOR_DEEP_ANALYSIS.md
-SEO_MARKETING_STRATEGY.md
-SEO_CHANGES_SUMMARY.md
+CREDENTIALS.md
 FINAL_MARKET_POSITION.md
 IMPLEMENTATION_COMPLETE.md
+LAUNCH_CHECKLIST.md
+MARKETING_FINAL.md
+MARKETING_TEMPLATES.md
+PERSONAL_PUBLISHER_OPTIONS.md
+PUBLISHER_VERIFICATION_GUIDE.md
+PUBLISH_SUCCESS.md
+QUICK_REFERENCE.md
+READY_TO_LAUNCH.md
+REDDIT_POST.md
+ROADMAP.md
+SEO_CHANGES_SUMMARY.md
+SEO_MARKETING_STRATEGY.md
+STACKOVERFLOW_ANSWERS.md
+SUMMARY.md
+TWITTER_THREAD.md
 
-# Build artifacts (DO NOT publish)
-build/
-.dart_tool/
-
-# Development/setup scripts
-*.sh
-*.bat
-
-# IDE specific
+# Development and testing files
 .vscode/
 .idea/
 *.iml
+.DS_Store
+coverage/
+
+# Reference docs
+REFERENCE_*.md
+*_REFERENCE.md
+
+# Build outputs
+build/
+.dart_tool/
