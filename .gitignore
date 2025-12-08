@@ -64,5 +64,11 @@ CREDENTIALS.md
 QUICK_REFERENCE.md
 SUMMARY.md
 
+# Marketing content (private)
+BLOG_POST.md
+REDDIT_POST.md
+STACKOVERFLOW_ANSWERS.md
+TWITTER_THREAD.md
+
 # Claude Code configuration (local only)
 .claude/
