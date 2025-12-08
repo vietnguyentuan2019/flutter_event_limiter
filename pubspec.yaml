@@ -10,12 +10,9 @@ issue_tracker: https://github.com/vietnguyentuan2019/flutter_event_limiter/issue
 topics:
   - throttle
   - debounce
-  - button
-  - widget
-  - double-click
   - performance
-  - debug
-  - metrics
+  - widget
+  - button
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
