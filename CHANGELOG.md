@@ -1,3 +1,116 @@
+## 1.1.0 - 2025-12-08
+
+**Phase 1: Foundation & Growth - Community Feedback & Polish** 🚀
+
+This release adds powerful debugging, monitoring, and control features based on community feedback.
+
+### Added
+
+#### **Debug Mode (P1)**
+- ✅ Added `debugMode` parameter to all controllers (Throttler, Debouncer, AsyncDebouncer, AsyncThrottler)
+- ✅ Added `name` parameter for controller identification in logs
+- ✅ Automatic timestamped logging of throttle/debounce events
+- Example:
+  ```dart
+  Throttler(
+    debugMode: true,
+    name: 'submit-button',
+  )
+  // Logs: "[submit-button] Throttle executed at 2025-12-08T10:30:45.123"
+  ```
+
+#### **Performance Metrics (P2)**
+- ✅ Added `onMetrics` callback to track execution time and state
+- ✅ **Throttler**: Tracks execution time and whether calls were executed or blocked
+- ✅ **Debouncer**: Tracks wait time and whether calls were cancelled
+- ✅ **AsyncDebouncer**: Tracks async operation duration and cancellations
+- ✅ **AsyncThrottler**: Tracks async operation duration and lock state
+- Example:
+  ```dart
+  Throttler(
+    onMetrics: (duration, executed) {
+      print('Execution time: $duration, executed: $executed');
+    },
+  )
+  ```
+
+#### **Conditional Throttling/Debouncing (P1)**
+- ✅ Added `enabled` parameter to all controllers
+- ✅ When `enabled = false`, controllers bypass throttle/debounce logic entirely
+- ✅ Useful for VIP users, admin modes, or testing
+- Example:
+  ```dart
+  Throttler(
+    enabled: !isVipUser, // VIP users skip throttle
+  )
+  ```
+
+#### **Custom Cooldown per Call (P2)**
+- ✅ Added `callWithDuration()` method to Throttler and Debouncer
+- ✅ Override default duration for specific calls
+- Example:
+  ```dart
+  final throttler = Throttler(duration: Duration(seconds: 1));
+  throttler.callWithDuration(() => normalAction(), Duration(milliseconds: 500));
+  throttler.callWithDuration(() => criticalAction(), Duration(seconds: 2));
+  ```
+
+#### **Reset on Error (P2)**
+- ✅ Added `resetOnError` parameter to all controllers
+- ✅ Automatically resets controller state when callbacks throw exceptions
+- ✅ Prevents users from being locked out after errors
+- Example:
+  ```dart
+  Throttler(
+    resetOnError: true, // Auto-resets after exceptions
+  )
+  ```
+
+#### **Batch Execution (P2)**
+- ✅ New `BatchThrottler` class for collecting and executing multiple actions as one batch
+- ✅ Useful for analytics tracking, batched API calls, or optimizing state updates
+- ✅ Includes `flush()`, `clear()`, and `pendingCount` for control
+- Example:
+  ```dart
+  final batcher = BatchThrottler(
+    duration: Duration(milliseconds: 500),
+    onBatchExecute: (actions) {
+      for (final action in actions) {
+        action();
+      }
+    },
+    debugMode: true,
+    name: 'analytics-batch',
+  );
+
+  // Multiple rapid calls
+  batcher.add(() => trackEvent('click1'));
+  batcher.add(() => trackEvent('click2'));
+  batcher.add(() => trackEvent('click3'));
+  // After 500ms, all 3 events execute as one batch
+  ```
+
+### Changed
+- ⚠️ **Minor Breaking Change**: Debouncer error handling - Errors in debounced callbacks are now swallowed (logged in debug mode) instead of being rethrown. This is consistent with Timer callback behavior and prevents uncaught exceptions in async scenarios.
+
+### Fixed
+- ✅ Improved edge case handling for dispose during async execution
+- ✅ Better hot reload support with proper cleanup
+- ✅ Fixed rapid rebuild scenarios
+- ✅ Fixed unused variable warning in Debouncer.flush()
+
+### Tests
+- ✅ Added comprehensive test suite for all v1.1.0 features
+- ✅ 78 total tests passing (all existing + 29 new v1.1.0 tests)
+- ✅ Test coverage for debug mode, metrics, conditional execution, custom durations, error handling, and batch execution
+
+### Documentation
+- ✅ Updated all controller documentation with v1.1.0 feature examples
+- ✅ Added inline examples for each new feature
+- ✅ Maintained backward compatibility for all existing APIs
+
+---
+
 ## 1.0.3 - 2025-12-07
 
 **Documentation Improvements** 📚
