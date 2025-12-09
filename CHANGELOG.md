@@ -1,3 +1,14 @@
+## 1.1.2 - 2025-12-09
+
+**Documentation Fix** 📝
+
+### Changed
+- Fixed overly promotional README marketing claims
+- Removed unverified user count claims
+- Made feature descriptions more accurate and professional
+
+---
+
 ## 1.1.1 - 2025-12-09
 
 **Enhanced Test Coverage & Documentation** 📚

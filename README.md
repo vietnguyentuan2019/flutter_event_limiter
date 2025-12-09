@@ -5,16 +5,16 @@
 [![Tests](https://img.shields.io/badge/tests-95%20passing-brightgreen.svg)](https://github.com/vietnguyentuan2019/flutter_event_limiter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**The complete event management system for production Flutter apps in 2025.**
+**Production-ready throttle and debounce for Flutter.**
 
 Stop wrestling with `Timer` boilerplate, race conditions, and setState crashes. Handle **Throttling** (anti-spam), **Debouncing** (search APIs), and **async operations** with zero configuration.
 
-> **Why 10,000+ developers choose flutter_event_limiter:**
+> **Why developers love this package:**
 > ✅ Works with **ANY** widget (Material, Cupertino, custom)
 > ✅ Auto-manages `mounted` checks and `Timer` disposal
 > ✅ Built-in loading states (no manual boolean flags)
 > ✅ Race condition prevention (auto-cancels old API calls)
-> ✅ Perfect 160/160 pub points · 95 tests · Zero dependencies
+> ✅ 160/160 pub points · 95 tests · Zero dependencies
 
 ---
 
@@ -63,16 +63,16 @@ AsyncDebouncedTextController(
 
 ---
 
-## ✨ Why Flutter Developers Love This (2025)
+## ✨ Key Features
 
 | What You Get | Why It Matters |
 |--------------|----------------|
 | 🧩 **Universal Builders** | Works with Material, Cupertino, custom widgets. Never locked into specific UI components. |
 | 🛡️ **Auto-Safety** | Zero setState crashes. Auto `mounted` checks. Auto `Timer` disposal. Production-tested. |
-| ⏳ **Smart Loading States** | Built-in `isLoading` tracking. No manual `bool isLoading = false` nonsense. |
-| 🏁 **Race Condition Killer** | Auto-cancels stale API calls. Search "flutter" → only "flutter" results shown, never "flu". |
-| 📉 **80% Less Code** | Compare 15 lines of manual Timer code vs 3 lines with us. See examples below. |
-| 🎯 **Production Ready** | 95 comprehensive tests. Perfect pub score. Used in apps with millions of users. |
+| ⏳ **Smart Loading States** | Built-in `isLoading` tracking. No manual `bool isLoading = false` needed. |
+| 🏁 **Race Condition Prevention** | Auto-cancels stale API calls. Search "flutter" → only "flutter" results shown, never "flu". |
+| 📉 **Less Boilerplate** | Compare 15 lines of manual Timer code vs 3 lines. See examples below. |
+| 🎯 **Production Ready** | 95 comprehensive tests. Perfect pub score. Well-tested and reliable. |
 
 ---
 
