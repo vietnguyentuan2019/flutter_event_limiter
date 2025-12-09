@@ -35,7 +35,7 @@
 /// ```
 ///
 /// See individual class documentation for detailed usage.
-library flutter_event_limiter;
+library;
 
 // Core controllers (advanced usage)
 export 'src/callback_controller.dart';

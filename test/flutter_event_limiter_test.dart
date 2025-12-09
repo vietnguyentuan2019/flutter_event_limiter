@@ -1029,7 +1029,6 @@ void main() {
     test('AsyncDebouncer should handle rapid sequential operations', () async {
       final debouncer =
           AsyncDebouncer(duration: const Duration(milliseconds: 10));
-      int successCount = 0;
 
       final futures = <Future<int?>>[];
       for (int i = 0; i < 10; i++) {
@@ -1173,7 +1172,6 @@ void main() {
     test('Search: Autocomplete with race condition prevention', () async {
       final debouncer =
           AsyncDebouncer(duration: const Duration(milliseconds: 300));
-      String? lastResult;
 
       // Simulate user typing "flutter"
       final futures = [
