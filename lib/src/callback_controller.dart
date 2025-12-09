@@ -120,7 +120,8 @@ class Throttler extends CallbackController {
     _throttleWithDuration(callback, customDuration);
   }
 
-  void _throttleWithDuration(VoidCallback callback, Duration effectiveDuration) {
+  void _throttleWithDuration(
+      VoidCallback callback, Duration effectiveDuration) {
     final startTime = DateTime.now();
 
     // Skip throttle if disabled
@@ -239,7 +240,8 @@ class Debouncer extends CallbackController {
     _debounceWithDuration(callback, customDuration);
   }
 
-  void _debounceWithDuration(VoidCallback callback, Duration effectiveDuration) {
+  void _debounceWithDuration(
+      VoidCallback callback, Duration effectiveDuration) {
     final callTime = DateTime.now();
 
     // Skip debounce if disabled
@@ -252,7 +254,8 @@ class Debouncer extends CallbackController {
     // Cancel previous timer (if any)
     if (_lastCallTime != null) {
       final waitTime = callTime.difference(_lastCallTime!);
-      debugLog('Debounce cancelled (new call after ${waitTime.inMilliseconds}ms)');
+      debugLog(
+          'Debounce cancelled (new call after ${waitTime.inMilliseconds}ms)');
       onMetrics?.call(waitTime, true);
     }
 
@@ -265,7 +268,8 @@ class Debouncer extends CallbackController {
     });
   }
 
-  void _executeCallback(VoidCallback callback, DateTime callTime, {required bool cancelled}) {
+  void _executeCallback(VoidCallback callback, DateTime callTime,
+      {required bool cancelled}) {
     if (cancelled) return;
 
     try {
