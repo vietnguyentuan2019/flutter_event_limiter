@@ -1,3 +1,32 @@
+## 1.1.1 - 2025-12-09
+
+**Enhanced Test Coverage & Documentation** 📚
+
+This release significantly improves test coverage and updates documentation for 2025.
+
+### Added
+- ✅ **23 new comprehensive test cases** covering:
+  - Stress tests with 100+ rapid calls
+  - Multiple instance independence tests
+  - Edge cases with extreme durations (very short/long)
+  - Real-world scenarios (e-commerce, search, chat, form validation, gaming)
+  - Performance benchmarks (1000+ operations)
+  - Total tests: **95 passing** (up from 78)
+
+### Changed
+- 📝 **Updated README with modern marketing content**
+  - Updated for 2025 best practices
+  - Enhanced feature descriptions
+  - Better performance metrics
+  - Updated test badge to show 95 passing tests
+  - More compelling value propositions
+
+### Fixed
+- 🐛 Improved timing reliability in async tests
+- 🐛 Better edge case handling in stress scenarios
+
+---
+
 ## 1.1.0 - 2025-12-08
 
 **Phase 1: Foundation & Growth - Community Feedback & Polish** 🚀

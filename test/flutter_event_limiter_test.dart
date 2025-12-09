@@ -996,5 +996,327 @@ void main() {
       throttler.dispose();
       // Should not crash
     });
+
+    test('Throttler should handle very rapid calls (stress test)', () {
+      final throttler = Throttler(duration: const Duration(milliseconds: 100));
+      int counter = 0;
+
+      // Simulate 100 rapid clicks
+      for (int i = 0; i < 100; i++) {
+        throttler.call(() => counter++);
+      }
+
+      expect(counter, 1); // Only first call executed
+      throttler.dispose();
+    });
+
+    test('Debouncer should handle very rapid calls (stress test)', () async {
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 50));
+      int counter = 0;
+
+      // Simulate 50 rapid calls
+      for (int i = 0; i < 50; i++) {
+        debouncer.call(() => counter++);
+      }
+
+      expect(counter, 0); // Nothing executed yet
+
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(counter, 1); // Only last call executed
+      debouncer.dispose();
+    });
+
+    test('AsyncDebouncer should handle rapid sequential operations', () async {
+      final debouncer =
+          AsyncDebouncer(duration: const Duration(milliseconds: 10));
+      int successCount = 0;
+
+      final futures = <Future<int?>>[];
+      for (int i = 0; i < 10; i++) {
+        futures.add(debouncer.run(() async {
+          await Future.delayed(const Duration(milliseconds: 5));
+          return i;
+        }));
+      }
+
+      final results = await Future.wait(futures);
+
+      // Only last operation should succeed, all others cancelled
+      for (int i = 0; i < results.length - 1; i++) {
+        expect(results[i], null);
+      }
+      expect(results.last, 9);
+
+      debouncer.dispose();
+    });
+
+    test('Multiple throttlers should work independently', () {
+      final throttler1 = Throttler(duration: const Duration(milliseconds: 100));
+      final throttler2 = Throttler(duration: const Duration(milliseconds: 100));
+      int counter1 = 0;
+      int counter2 = 0;
+
+      throttler1.call(() => counter1++);
+      throttler2.call(() => counter2++);
+
+      throttler1.call(() => counter1++); // Blocked
+      throttler2.call(() => counter2++); // Blocked
+
+      expect(counter1, 1);
+      expect(counter2, 1);
+
+      throttler1.dispose();
+      throttler2.dispose();
+    });
+
+    test('Throttler with very short duration', () async {
+      final throttler = Throttler(duration: const Duration(milliseconds: 1));
+      int counter = 0;
+
+      throttler.call(() => counter++);
+      throttler.call(() => counter++); // Blocked
+
+      expect(counter, 1);
+
+      await Future.delayed(const Duration(milliseconds: 5));
+
+      throttler.call(() => counter++); // Should work now
+      expect(counter, 2);
+
+      throttler.dispose();
+    });
+
+    test('Debouncer with very long duration', () async {
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 200));
+      int counter = 0;
+
+      debouncer.call(() => counter++);
+      await Future.delayed(const Duration(milliseconds: 50));
+      debouncer.call(() => counter++); // Resets timer
+
+      expect(counter, 0);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(counter, 0); // Still waiting
+
+      await Future.delayed(const Duration(milliseconds: 200));
+      expect(counter, 1); // Finally executed
+
+      debouncer.dispose();
+    });
+
+    test('AsyncThrottler should handle very fast async operations', () async {
+      final throttler = AsyncThrottler();
+      int counter = 0;
+
+      await throttler.call(() async {
+        // Very fast operation
+        counter++;
+      });
+
+      expect(counter, 1);
+      expect(throttler.isLocked, false);
+
+      throttler.dispose();
+    });
+
+    test('HighFrequencyThrottler should track throttled state', () async {
+      final throttler =
+          HighFrequencyThrottler(duration: const Duration(milliseconds: 50));
+      int counter = 0;
+
+      expect(throttler.isThrottled, false);
+
+      throttler.call(() => counter++);
+      expect(throttler.isThrottled, true);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(throttler.isThrottled, false);
+
+      throttler.dispose();
+    });
+
+    test('AsyncDebouncedTextController should handle clear', () {
+      final controller = AsyncDebouncedTextController<String>(
+        duration: const Duration(milliseconds: 50),
+        onChanged: (text) async {
+          await Future.delayed(const Duration(milliseconds: 20));
+          return text;
+        },
+      );
+
+      controller.setText('test');
+      expect(controller.text, 'test');
+
+      controller.clear(); // Clear text
+      expect(controller.text, '');
+
+      controller.dispose();
+    });
+  });
+
+  group('Real-World Scenarios', () {
+    test('E-commerce: Prevent double order submission', () async {
+      final throttler = Throttler(duration: const Duration(seconds: 2));
+      int orderCount = 0;
+
+      // Simulate user double-clicking "Place Order" button
+      throttler.call(() => orderCount++);
+      throttler.call(() => orderCount++);
+      throttler.call(() => orderCount++);
+
+      expect(orderCount, 1); // Only one order placed
+
+      throttler.dispose();
+    });
+
+    test('Search: Autocomplete with race condition prevention', () async {
+      final debouncer =
+          AsyncDebouncer(duration: const Duration(milliseconds: 300));
+      String? lastResult;
+
+      // Simulate user typing "flutter"
+      final futures = [
+        debouncer.run(() async {
+          await Future.delayed(const Duration(milliseconds: 50));
+          return 'results for: f';
+        }),
+        debouncer.run(() async {
+          await Future.delayed(const Duration(milliseconds: 50));
+          return 'results for: fl';
+        }),
+        debouncer.run(() async {
+          await Future.delayed(const Duration(milliseconds: 50));
+          return 'results for: flu';
+        }),
+        debouncer.run(() async {
+          await Future.delayed(const Duration(milliseconds: 50));
+          return 'results for: flutter';
+        }),
+      ];
+
+      final results = await Future.wait(futures);
+
+      // Only last search should succeed
+      expect(results[0], null);
+      expect(results[1], null);
+      expect(results[2], null);
+      expect(results[3], 'results for: flutter');
+
+      debouncer.dispose();
+    });
+
+    test('Chat app: Prevent message spam', () {
+      final throttler = Throttler(duration: const Duration(seconds: 1));
+      int messagesSent = 0;
+
+      // Simulate user pressing Enter repeatedly
+      for (int i = 0; i < 10; i++) {
+        throttler.call(() => messagesSent++);
+      }
+
+      expect(messagesSent, 1); // Only one message sent
+
+      throttler.dispose();
+    });
+
+    test('Form validation: Debounced async validation concept', () {
+      // This test demonstrates the concept of async validation
+      final controller = AsyncDebouncedTextController<bool>(
+        duration: const Duration(milliseconds: 50),
+        onChanged: (text) async {
+          // Simulate API call to check if username is available
+          await Future.delayed(const Duration(milliseconds: 20));
+          return text.length >= 3; // Valid if 3+ chars
+        },
+      );
+
+      controller.setText('a');
+      controller.setText('ab');
+      controller.setText('abc');
+
+      // Verify text is set correctly
+      expect(controller.text, 'abc');
+
+      controller.dispose();
+    });
+
+    test('Game: High-frequency input throttling', () {
+      final throttler = HighFrequencyThrottler(
+        duration: const Duration(milliseconds: 16), // ~60fps
+      );
+      int updateCount = 0;
+
+      // Simulate rapid game loop updates
+      for (int i = 0; i < 100; i++) {
+        throttler.call(() => updateCount++);
+      }
+
+      expect(updateCount, 1); // Only first frame processed
+      throttler.dispose();
+    });
+  });
+
+  group('Performance Tests', () {
+    test('Throttler performance with 1000 calls', () {
+      final stopwatch = Stopwatch()..start();
+      final throttler = Throttler(duration: const Duration(milliseconds: 100));
+      int counter = 0;
+
+      for (int i = 0; i < 1000; i++) {
+        throttler.call(() => counter++);
+      }
+
+      stopwatch.stop();
+
+      expect(counter, 1);
+      expect(stopwatch.elapsedMilliseconds, lessThan(100)); // Should be fast
+
+      throttler.dispose();
+    });
+
+    test('Debouncer performance with 1000 calls', () {
+      final stopwatch = Stopwatch()..start();
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 50));
+      int counter = 0;
+
+      for (int i = 0; i < 1000; i++) {
+        debouncer.call(() => counter++);
+      }
+
+      stopwatch.stop();
+
+      expect(counter, 0); // Not executed yet
+      expect(stopwatch.elapsedMilliseconds, lessThan(100)); // Should be fast
+
+      debouncer.dispose();
+    });
+
+    test('HighFrequencyThrottler is faster than regular Throttler', () {
+      final regularStopwatch = Stopwatch()..start();
+      final regularThrottler =
+          Throttler(duration: const Duration(milliseconds: 16));
+
+      for (int i = 0; i < 100; i++) {
+        regularThrottler.call(() {});
+      }
+      regularStopwatch.stop();
+
+      final highFreqStopwatch = Stopwatch()..start();
+      final highFreqThrottler =
+          HighFrequencyThrottler(duration: const Duration(milliseconds: 16));
+
+      for (int i = 0; i < 100; i++) {
+        highFreqThrottler.call(() {});
+      }
+      highFreqStopwatch.stop();
+
+      // HighFrequencyThrottler should be faster (no Timer overhead)
+      expect(highFreqStopwatch.elapsedMicroseconds,
+          lessThan(regularStopwatch.elapsedMicroseconds));
+
+      regularThrottler.dispose();
+      highFreqThrottler.dispose();
+    });
   });
 }
