@@ -5,26 +5,17 @@
 [![Tests](https://img.shields.io/badge/tests-95%20passing-brightgreen.svg)](https://github.com/vietnguyentuan2019/flutter_event_limiter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Production-ready throttle and debounce for Flutter.**
+**Production-ready throttle and debounce for Flutter apps.**
 
-Stop wrestling with `Timer` boilerplate, race conditions, and setState crashes. Handle **Throttling** (anti-spam), **Debouncing** (search APIs), and **async operations** with zero configuration.
-
-> **Why developers love this package:**
-> ✅ Works with **ANY** widget (Material, Cupertino, custom)
-> ✅ Auto-manages `mounted` checks and `Timer` disposal
-> ✅ Built-in loading states (no manual boolean flags)
-> ✅ Race condition prevention (auto-cancels old API calls)
-> ✅ 160/160 pub points · 95 tests · Zero dependencies
+Stop wrestling with `Timer` boilerplate, race conditions, and setState crashes. Handle button spam, search debouncing, and async operations with **3 lines of code** instead of 15+.
 
 ---
 
-## ⚡ The 30-Second Demo
+## ⚡ Quick Start
 
-### The Old Way (Manual & Risky)
-15+ lines. Easy to forget `dispose` or `mounted` checks.
+### Problem: Manual Throttling (15+ lines, error-prone)
 
 ```dart
-// ❌ Boilerplate & Error Prone
 Timer? _timer;
 bool _loading = false;
 
@@ -34,7 +25,7 @@ void onSearch(String text) {
     setState(() => _loading = true);
     try {
       final result = await api.search(text);
-      if (!mounted) return; // Must remember this!
+      if (!mounted) return; // Easy to forget!
       setState(() => _result = result);
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -44,121 +35,93 @@ void onSearch(String text) {
 
 @override
 void dispose() {
-  _timer?.cancel(); // Must remember this too!
+  _timer?.cancel(); // Easy to forget!
   super.dispose();
 }
 ```
 
-### The New Way (Safe & Clean)
-3 lines. Auto-dispose. Auto-mounted check. Auto-loading state.
+### Solution: flutter_event_limiter (3 lines, safe)
 
 ```dart
-// ✅ Clean & Safe
 AsyncDebouncedTextController(
   onChanged: (text) async => await api.search(text),
   onSuccess: (result) => setState(() => _result = result),
-  onLoadingChanged: (loading) => setState(() => _loading = loading), // ✨ Magic!
+  onLoadingChanged: (loading) => setState(() => _loading = loading),
 )
 ```
 
----
-
-## ✨ Key Features
-
-| What You Get | Why It Matters |
-|--------------|----------------|
-| 🧩 **Universal Builders** | Works with Material, Cupertino, custom widgets. Never locked into specific UI components. |
-| 🛡️ **Auto-Safety** | Zero setState crashes. Auto `mounted` checks. Auto `Timer` disposal. Production-tested. |
-| ⏳ **Smart Loading States** | Built-in `isLoading` tracking. No manual `bool isLoading = false` needed. |
-| 🏁 **Race Condition Prevention** | Auto-cancels stale API calls. Search "flutter" → only "flutter" results shown, never "flu". |
-| 📉 **Less Boilerplate** | Compare 15 lines of manual Timer code vs 3 lines. See examples below. |
-| 🎯 **Production Ready** | 95 comprehensive tests. Perfect pub score. Well-tested and reliable. |
+**Result:** 80% less code. Auto-dispose. Auto mounted checks. Auto loading state.
 
 ---
 
-## 🚀 Usage Examples
+## ✨ Why This Library?
 
-### 1. Prevent Button Double-Clicks (Throttle)
+**Built for production use:**
+- ✅ **160/160 pub points** - Perfect score, actively maintained
+- ✅ **95 comprehensive tests** - Edge cases covered, battle-tested
+- ✅ **Zero dependencies** - No bloat, no conflicts
 
-Stop users from accidentally spamming payment buttons or API calls.
+**Saves development time:**
+- ✅ **3 lines vs 15+** - Eliminates boilerplate
+- ✅ **Auto-safety** - No setState crashes, no memory leaks
+- ✅ **Works with any widget** - Material, Cupertino, custom widgets
+
+**Unique features:**
+- ✅ **Built-in loading state** - No manual `bool isLoading = false` needed
+- ✅ **Race condition prevention** - Auto-cancels stale API calls
+- ✅ **Universal builders** - Not locked into specific widgets
+
+[See detailed comparison with alternatives →](docs/comparison.md)
+
+---
+
+## 🚀 Common Use Cases
+
+### 1. Prevent Button Double-Clicks
 
 ```dart
 ThrottledInkWell(
-  onTap: () => submitOrder(), // 👈 Only runs once per 500ms
+  onTap: () => submitOrder(), // Only executes once per 500ms
   child: Text("Submit Order"),
-)
-
-// OR use with ANY widget:
-ThrottledBuilder(
-  builder: (context, throttle) {
-    return CupertinoButton(
-      onPressed: throttle(() => submitOrder()),
-      child: Text("Submit"),
-    );
-  },
 )
 ```
 
-### 2. Smart Search Bar (Async Debounce)
+[See E-Commerce example →](docs/examples/e-commerce.md)
 
-Waits for the user to stop typing. Automatically cancels old network requests to prevent wrong results.
+### 2. Smart Search Bar
 
 ```dart
 AsyncDebouncedTextController(
   duration: Duration(milliseconds: 300),
   onChanged: (text) async => await api.search(text),
-
-  // ✅ Only called if widget is mounted AND it's the latest result
   onSuccess: (products) => setState(() => _products = products),
-
-  // ✅ Auto-manage loading spinner
   onLoadingChanged: (isLoading) => setState(() => _loading = isLoading),
 )
 ```
 
-### 3. Form Submission with Loading UI
+[See Search example →](docs/examples/search.md)
 
-Disable the button and show a spinner while the async task runs.
+### 3. Form Submission with Loading UI
 
 ```dart
 AsyncThrottledCallbackBuilder(
   onPressed: () async => await uploadFile(),
   builder: (context, callback, isLoading) {
     return ElevatedButton(
-      // Auto-disable button when loading
       onPressed: isLoading ? null : callback,
-      child: isLoading
-          ? CircularProgressIndicator()
-          : Text("Upload"),
+      child: isLoading ? CircularProgressIndicator() : Text("Upload"),
     );
   },
 )
 ```
 
----
-
-## 📊 Feature Comparison
-
-How `flutter_event_limiter` improves upon common patterns:
-
-| Feature | Raw Utility Libs | Stream Libs (Rx) | Hard-Coded Widget Libs | flutter_event_limiter |
-|---------|------------------|------------------|------------------------|----------------------|
-| **Approach** | Manual | Reactive | Fixed Widgets | Builder Pattern |
-| **Works with Any Widget** | ❌ | ❌ | ❌ | ✅ |
-| **Auto Mounted Check** | ❌ | ❌ | ❌ | ✅ |
-| **Auto Loading State** | ❌ | ❌ | ❌ | ✅ |
-| **Prevents Race Conditions** | ❌ | ✅ | ⚠️ | ✅ |
-| **Setup Difficulty** | Medium | Hard | Easy | Easy |
-
-**Note:** While libraries like RxDart are powerful for complex stream transformations, `flutter_event_limiter` is optimized specifically for UI event handling with zero setup.
+[See Form example →](docs/examples/form-submission.md)
 
 ---
 
 ## 🎨 Universal Builder Pattern
 
-**The Power of Flexibility:** Unlike libraries that lock you into specific widgets, our builder pattern works with **everything**.
-
-### Example 1: Custom FAB with Throttle
+**The power of flexibility:** Works with **any** Flutter widget.
 
 ```dart
 ThrottledBuilder(
@@ -172,170 +135,21 @@ ThrottledBuilder(
 )
 ```
 
-### Example 2: Cupertino Button with Debounce
+**Use with:**
+- ✅ Material Design (`ElevatedButton`, `FloatingActionButton`, `InkWell`)
+- ✅ Cupertino (`CupertinoButton`, `CupertinoTextField`)
+- ✅ Custom widgets from any package
+- ✅ Third-party UI libraries
 
-```dart
-DebouncedBuilder(
-  duration: Duration(milliseconds: 500),
-  builder: (context, debounce) {
-    return CupertinoButton(
-      onPressed: debounce(() => updateSettings()),
-      child: Text("Save"),
-    );
-  },
-)
-```
-
-### Example 3: Custom Slider with Debounce
-
-```dart
-DebouncedBuilder(
-  builder: (context, debounce) {
-    return Slider(
-      value: _volume,
-      onChanged: (value) => debounce(() {
-        setState(() => _volume = value);
-        api.updateVolume(value);
-      }),
-    );
-  },
-)
-```
-
-**Why this matters:** Works with Material, Cupertino, Custom Widgets, or any third-party UI library.
+Unlike other libraries that lock you into specific widgets, flutter_event_limiter **adapts to your UI framework**.
 
 ---
 
-## 📚 Complete Widget Reference
-
-### 🛡️ Throttling (Anti-Spam for Buttons)
-
-Executes **immediately**, then blocks for duration.
-
-| Widget | Use Case |
-|--------|----------|
-| `ThrottledInkWell` | Buttons with Material ripple effect |
-| `ThrottledTapWidget` | Buttons without ripple |
-| `ThrottledBuilder` | **Universal** - Works with ANY widget |
-| `AsyncThrottledCallbackBuilder` | Async operations with auto loading state |
-| `AsyncThrottledCallback` | Async operations (manual mounted check) |
-| `Throttler` | Direct class usage (advanced) |
-
-**When to use:** Button clicks, form submissions, prevent spam clicks
-
----
-
-### ⏱️ Debouncing (Search, Auto-save)
-
-Waits for **pause**, then executes.
-
-| Widget | Use Case |
-|--------|----------|
-| `DebouncedTextController` | Basic text input debouncing |
-| `AsyncDebouncedTextController` | Search API with auto-cancel & loading state |
-| `DebouncedBuilder` | **Universal** - Works with ANY widget |
-| `AsyncDebouncedCallbackBuilder` | Async with loading state |
-| `Debouncer` | Direct class usage (advanced) |
-
-**When to use:** Search input, auto-save, real-time validation
-
----
-
-### 🎮 High-Frequency Events
-
-| Widget | Use Case |
-|--------|----------|
-| `HighFrequencyThrottler` | Scroll, mouse move, resize (60fps max, zero Timer overhead) |
-
----
-
-## 💼 Real-World Scenarios
-
-### 🛒 E-Commerce: Prevent Double Checkout
-
-**Problem:** User clicks "Place Order" twice during slow network → Payment charged twice.
-
-```dart
-ThrottledInkWell(
-  onTap: () async => await placeOrder(),
-  child: Container(
-    padding: EdgeInsets.all(16),
-    color: Colors.green,
-    child: Text("Place Order - \$199.99"),
-  ),
-)
-// ✅ Second click ignored for 500ms - No duplicate orders
-```
-
----
-
-### 🔍 Search with Race Condition Prevention
-
-**Problem:** User types "abc", API for "a" returns after "abc" → Wrong results displayed.
-
-```dart
-AsyncDebouncedTextController(
-  duration: Duration(milliseconds: 300),
-  onChanged: (text) async => await searchProducts(text),
-  onSuccess: (products) => setState(() => _products = products),
-  onLoadingChanged: (loading) => setState(() => _searching = loading),
-)
-// ✅ Old API calls auto-cancelled
-// ✅ Only latest result displayed
-```
-
----
-
-### 📝 Form with Auto Loading State
-
-**Problem:** No feedback during submission → User clicks again → Duplicate submit.
-
-```dart
-AsyncThrottledCallbackBuilder(
-  onPressed: () async {
-    await validateForm();
-    await submitForm();
-    if (!context.mounted) return;
-    Navigator.pop(context);
-  },
-  onError: (error, stack) => showSnackBar('Failed: $error'),
-  builder: (context, callback, isLoading) {
-    return ElevatedButton(
-      onPressed: isLoading ? null : callback,
-      child: isLoading ? CircularProgressIndicator() : Text("Submit"),
-    );
-  },
-)
-// ✅ Button auto-disabled during submit
-// ✅ Loading indicator auto-managed
-```
-
----
-
-### 💬 Chat App: Prevent Message Spam
-
-**Problem:** User presses Enter rapidly → Sends duplicate messages.
-
-```dart
-ThrottledBuilder(
-  duration: Duration(seconds: 1),
-  builder: (context, throttle) {
-    return IconButton(
-      onPressed: throttle(() => sendMessage(_controller.text)),
-      icon: Icon(Icons.send),
-    );
-  },
-)
-// ✅ Max 1 message per second
-```
-
----
-
-## 🎓 Throttle vs Debounce: Which One?
+## 📊 Throttle vs Debounce: Which One?
 
 ### Throttle (Anti-Spam)
 
-**Fires immediately**, then ignores clicks for a duration.
+Fires **immediately**, then blocks for duration.
 
 ```
 User clicks: ▼     ▼   ▼▼▼       ▼
@@ -343,13 +157,11 @@ Executes:    ✓     X   X X       ✓
              |<-500ms->|         |<-500ms->|
 ```
 
-**Use for:** Buttons, Submits, Refresh actions
+**Use for:** Button clicks, refresh actions, preventing spam
 
----
+### Debounce (Wait for Pause)
 
-### Debounce (Delay)
-
-**Waits for a pause** in action, then fires.
+Waits for **pause** in events, then fires.
 
 ```
 User types:  a  b  c  d ... (pause) ... e  f  g
@@ -357,13 +169,11 @@ Executes:                   ✓                   ✓
              |<--300ms wait-->|     |<--300ms wait-->|
 ```
 
-**Use for:** Search bars, Auto-save, Slider values
-
----
+**Use for:** Search input, auto-save, slider changes
 
 ### AsyncDebouncer (Debounce + Auto-Cancel)
 
-**Waits for pause + Cancels previous async operations.**
+Waits for pause **and** cancels previous async operations.
 
 ```
 User types:  a    b    c  (API starts) ... d
@@ -373,295 +183,113 @@ Result used:                            ✓ (only 'd')
 
 **Use for:** Search APIs, autocomplete, async validation
 
----
-
-## 🔄 Migration from Other Libraries
-
-### From `easy_debounce`
-
-**Why migrate?** Stop managing string IDs manually. Stop worrying about memory leaks.
-
-```dart
-// Before: Manual ID management, easy to forget dispose
-import 'package:easy_debounce/easy_debounce.dart';
-
-void onSearch(String text) {
-  EasyDebounce.debounce(
-    'search-tag', // ❌ Manage ID manually
-    Duration(milliseconds: 300),
-    () async {
-      final result = await api.search(text);
-      if (!mounted) return; // ❌ Easy to forget
-      setState(() => _results = result);
-    },
-  );
-}
-
-@override
-void dispose() {
-  EasyDebounce.cancel('search-tag'); // ❌ Easy to forget
-  super.dispose();
-}
-
-// After: Auto-everything, 70% less code
-AsyncDebouncedTextController(
-  onChanged: (text) async => await api.search(text),
-  onSuccess: (results) => setState(() => _results = results),
-)
-// ✅ Auto-dispose, auto mounted check, no ID management
-```
-
-**Benefits:**
-- ✅ No string ID management
-- ✅ Auto-dispose (zero memory leaks)
-- ✅ Built-in loading state
-- ✅ Auto race condition prevention
+[Learn more about timing strategies →](docs/guides/throttle-vs-debounce.md)
 
 ---
 
-### From `flutter_smart_debouncer`
+## 📚 Complete Widget Reference
 
-**Why migrate?** Stop being locked into hard-coded widgets. Use ANY widget you want.
+### Throttling (Anti-Spam Buttons)
 
-```dart
-// Before: Locked to specific widget
-SmartDebouncerButton(
-  onPressed: () => submit(),
-  child: Text("Submit"),
-)
-// ❌ What if you need CupertinoButton? FloatingActionButton? Custom widget?
+| Widget | Use Case |
+|--------|----------|
+| `ThrottledInkWell` | Material buttons with ripple |
+| `ThrottledBuilder` | **Universal** - Any widget |
+| `AsyncThrottledCallbackBuilder` | Async with auto loading state |
+| `Throttler` | Direct class (advanced) |
 
-// After: Universal builder - Use ANY widget
-ThrottledBuilder(
-  builder: (context, throttle) {
-    return CupertinoButton( // Or FloatingActionButton, Custom, etc.
-      onPressed: throttle(() => submit()),
-      child: Text("Submit"),
-    );
-  },
-)
-```
+### Debouncing (Search, Auto-save)
 
-**Benefits:**
-- ✅ Works with ANY widget (Material, Cupertino, Custom)
-- ✅ Not locked into specific UI components
-- ✅ More flexible and future-proof
-- ✅ Built-in loading state
+| Widget | Use Case |
+|--------|----------|
+| `DebouncedTextController` | Basic text input |
+| `AsyncDebouncedTextController` | Search API with loading |
+| `DebouncedBuilder` | **Universal** - Any widget |
+| `Debouncer` | Direct class (advanced) |
 
----
+### High-Frequency Events
 
-### From `rxdart`
+| Widget | Use Case |
+|--------|----------|
+| `HighFrequencyThrottler` | Scroll, mouse, resize (60fps) |
 
-**Why migrate?** For simple UI events, you don't need Stream complexity.
-
-```dart
-// Before: 15+ lines with Stream/BehaviorSubject
-final _searchController = BehaviorSubject<String>();
-
-@override
-void initState() {
-  super.initState();
-  _searchController.stream
-    .debounceTime(Duration(milliseconds: 300))
-    .listen((text) async {
-      final result = await api.search(text);
-      if (!mounted) return;
-      setState(() => _result = result);
-    });
-}
-
-@override
-void dispose() {
-  _searchController.close();
-  super.dispose();
-}
-
-// After: 3 lines, no Stream knowledge needed
-AsyncDebouncedTextController(
-  onChanged: (text) async => await api.search(text),
-  onSuccess: (result) => setState(() => _result = result),
-)
-```
-
-**Benefits:**
-- ✅ 80% less boilerplate
-- ✅ No need to learn Streams/Subjects/Operators
-- ✅ Auto mounted check (zero crashes)
-- ✅ Flutter-first design (optimized for UI events)
-
-**When to still use RxDart:**
-- Complex reactive state management across multiple screens
-- Need advanced operators (`combineLatest`, `switchMap`, etc.)
-- Building reactive architecture (BLoC pattern)
+[View full API documentation →](https://pub.dev/documentation/flutter_event_limiter)
 
 ---
 
-## 🔧 Advanced Features
+## 🛠 Installation
 
-### Custom Durations
-
-```dart
-ThrottledInkWell(
-  duration: Duration(seconds: 1), // Configurable
-  onTap: () => submit(),
-  child: Text('Submit'),
-)
+```bash
+flutter pub add flutter_event_limiter
 ```
 
-### Reset Throttle Manually
+Or add to `pubspec.yaml`:
 
-```dart
-final throttler = Throttler();
-
-InkWell(
-  onTap: throttler.wrap(() => handleTap()),
-  child: Text('Tap me'),
-)
-
-// Reset to allow immediate next call
-throttler.reset();
-
-// Check current state
-if (throttler.isThrottled) {
-  print('Currently blocked');
-}
+```yaml
+dependencies:
+  flutter_event_limiter: ^1.1.2
 ```
 
-### Flush Debouncer (Execute Immediately)
+Then import:
 
 ```dart
-final controller = DebouncedTextController(
-  onChanged: (text) => search(text),
-);
-
-// User presses Enter → Execute immediately without waiting
-onSubmit() {
-  controller.flush(); // Cancels timer, executes now
-}
-```
-
-### Manual Cancel
-
-```dart
-final debouncer = AsyncDebouncer();
-
-// Start debounced operation
-debouncer.run(() async => await api.call());
-
-// Cancel all pending operations
-debouncer.cancel();
+import 'package:flutter_event_limiter/flutter_event_limiter.dart';
 ```
 
 ---
 
-## ⚠️ Common Pitfalls
+## 📖 Documentation
 
-### 1. Forgetting Mounted Check with Builder Widgets
+### Getting Started
+- [Quick Start Guide](docs/getting-started.md)
+- [Throttle vs Debounce Explained](docs/guides/throttle-vs-debounce.md)
+- [FAQ](docs/faq.md) - Common questions answered
 
-```dart
-// ❌ BAD - Will crash if widget unmounts during async operation
-AsyncDebouncedBuilder(
-  builder: (context, debounce) {
-    return TextField(
-      onChanged: (text) => debounce(() async {
-        final result = await api.search(text);
-        setState(() => _result = result); // ❌ Crash if unmounted!
-      }),
-    );
-  },
-)
+### Examples
+- [E-Commerce: Prevent Double Checkout](docs/examples/e-commerce.md)
+- [Search with Race Condition Prevention](docs/examples/search.md)
+- [Form Submission with Loading State](docs/examples/form-submission.md)
+- [Chat App: Prevent Message Spam](docs/examples/chat-app.md)
 
-// ✅ GOOD - Always check mounted
-AsyncDebouncedBuilder(
-  builder: (context, debounce) {
-    return TextField(
-      onChanged: (text) => debounce(() async {
-        final result = await api.search(text);
-        if (!mounted) return; // ✅ Safe
-        setState(() => _result = result);
-      }),
-    );
-  },
-)
+### Migration Guides
+- [From easy_debounce](docs/migration/from-easy-debounce.md) - Stop managing IDs manually
+- [From flutter_smart_debouncer](docs/migration/from-flutter-smart-debouncer.md) - Unlock from fixed widgets
+- [From rxdart](docs/migration/from-rxdart.md) - Simpler API for UI events
 
-// ✅ BETTER - Use CallbackBuilder for automatic mounted check
-AsyncDebouncedCallbackBuilder(
-  onChanged: (text) async => await api.search(text),
-  onSuccess: (result) => setState(() => _result = result), // ✅ Auto-checks mounted
-  builder: (context, callback, isLoading) => TextField(onChanged: callback),
-)
-```
-
-### 2. Not Handling Null from AsyncDebouncer
-
-```dart
-// ❌ BAD - Can crash if result is null (cancelled)
-final result = await asyncDebouncer.run(() async => await api.call());
-processResult(result); // ❌ Crash if cancelled
-
-// ✅ GOOD - Check for cancellation
-final result = await asyncDebouncer.run(() async => await api.call());
-if (result == null) return; // Operation was cancelled
-processResult(result); // ✅ Safe
-```
-
-### 3. Providing Both `controller` and `initialValue`
-
-```dart
-// ❌ BAD - Will throw assertion error
-DebouncedTextController(
-  controller: myController,
-  initialValue: "test", // ❌ Conflict!
-  onChanged: (text) => search(text),
-)
-
-// ✅ GOOD - Use controller only
-final controller = TextEditingController(text: "initial");
-DebouncedTextController(
-  controller: controller,
-  onChanged: (text) => search(text),
-)
-
-// ✅ GOOD - Use initialValue only
-DebouncedTextController(
-  initialValue: "initial",
-  onChanged: (text) => search(text),
-)
-```
+### Advanced
+- [Detailed Comparison with Alternatives](docs/comparison.md)
+- [Roadmap](ROADMAP.md) - Upcoming features
+- [API Reference](https://pub.dev/documentation/flutter_event_limiter)
 
 ---
 
-## ❓ FAQ
+## 🎯 Features
 
-### Q: Can I use this with GetX/Riverpod/Bloc?
+**Core Capabilities:**
+- ⏱️ **Throttle** - Execute immediately, block duplicates
+- ⏳ **Debounce** - Wait for pause, then execute
+- 🔄 **Async Support** - Built-in for async operations
+- 🏃 **High Frequency** - Optimized for scroll/mouse events (60fps)
+- 🎭 **Combo** - ThrottleDebouncer (leading + trailing)
 
-**A:** Yes! State-management agnostic.
+**Safety & Reliability:**
+- 🛡️ **Auto Dispose** - Zero memory leaks
+- ✅ **Auto Mounted Checks** - No setState crashes
+- 🏁 **Race Condition Prevention** - Auto-cancel stale calls
+- 📦 **Batch Execution** - Group multiple operations
 
-```dart
-// GetX
-ThrottledInkWell(
-  onTap: () => Get.find<MyController>().submit(),
-  child: Text("Submit"),
-)
+**Developer Experience:**
+- 🎨 **Universal Builders** - Works with any widget
+- 📊 **Built-in Loading State** - No manual flags
+- 🐛 **Debug Mode** - Log throttle/debounce events
+- 📈 **Performance Metrics** - Track execution time
+- ⚙️ **Conditional Execution** - Enable/disable dynamically
 
-// Riverpod
-AsyncDebouncedTextController(
-  onChanged: (text) async => await ref.read(searchProvider.notifier).search(text),
-  onSuccess: (results) => /* update state */,
-)
+---
 
-// Bloc
-ThrottledBuilder(
-  builder: (context, throttle) {
-    return ElevatedButton(
-      onPressed: throttle(() => context.read<MyBloc>().add(SubmitEvent())),
-      child: Text("Submit"),
-    );
-  },
-)
-```
+## 🧪 Testing
 
-### Q: How to test widgets using this library?
+Works seamlessly with Flutter's test framework:
 
 ```dart
 testWidgets('throttle blocks rapid clicks', (tester) async {
@@ -678,63 +306,141 @@ testWidgets('throttle blocks rapid clicks', (tester) async {
   );
 
   await tester.tap(find.text('Tap'));
-  await tester.pump();
   expect(clickCount, 1);
 
   await tester.tap(find.text('Tap')); // Blocked
-  await tester.pump();
-  expect(clickCount, 1); // Still 1!
+  expect(clickCount, 1);
 
   await tester.pumpAndSettle(Duration(milliseconds: 500));
-
   await tester.tap(find.text('Tap')); // Works again
-  await tester.pump();
   expect(clickCount, 2);
 });
 ```
 
-### Q: Performance overhead?
-
-**A:** Near-zero! Benchmarked with 1000+ concurrent operations:
-- **Throttle/Debounce:** ~0.01ms per call (faster than manual `Timer`)
-- **High-Frequency Throttler:** ~0.001ms (100x faster, uses `DateTime` instead of `Timer`)
-- **Memory:** ~40 bytes per controller (same as a single `Timer`)
-- **Stress tested:** Handles 100+ rapid calls without frame drops
+[See more testing examples in FAQ →](docs/faq.md#testing)
 
 ---
 
-## 🛠 Installation
+## 🔧 Advanced Features (v1.1.0+)
 
-**Quick Start (30 seconds):**
-
-```bash
-# Add to your project
-flutter pub add flutter_event_limiter
-
-# That's it! Zero configuration needed.
-```
-
-Or manually add to `pubspec.yaml`:
-
-```yaml
-dependencies:
-  flutter_event_limiter: ^1.1.1
-```
-
-Import:
+### Debug Mode
 
 ```dart
-import 'package:flutter_event_limiter/flutter_event_limiter.dart';
+Throttler(
+  debugMode: true,
+  name: 'submit-button',
+  onMetrics: (duration, executed) {
+    print('Throttle took: $duration, executed: $executed');
+  },
+)
 ```
+
+### Conditional Throttling
+
+```dart
+ThrottledBuilder(
+  enabled: !isVipUser, // VIP users skip throttle
+  builder: (context, throttle) => ElevatedButton(...),
+)
+```
+
+### Custom Duration per Call
+
+```dart
+final throttler = Throttler();
+
+throttler.callWithDuration(
+  () => criticalAction(),
+  duration: Duration(seconds: 2), // Override default
+);
+```
+
+### Manual Reset
+
+```dart
+final throttler = Throttler();
+throttler.call(() => action());
+throttler.reset(); // Clear throttle state
+throttler.call(() => action()); // Executes immediately
+```
+
+[See all advanced features →](docs/guides/advanced-features.md)
+
+---
+
+## 💡 Integration with State Management
+
+Works with **all** state management solutions:
+
+**GetX:**
+```dart
+ThrottledInkWell(
+  onTap: () => Get.find<MyController>().submit(),
+  child: Text("Submit"),
+)
+```
+
+**Riverpod:**
+```dart
+AsyncDebouncedTextController(
+  onChanged: (text) async {
+    return await ref.read(searchProvider.notifier).search(text);
+  },
+  onSuccess: (results) {
+    // Update state
+  },
+)
+```
+
+**Bloc:**
+```dart
+ThrottledBuilder(
+  builder: (context, throttle) {
+    return ElevatedButton(
+      onPressed: throttle(() => context.read<MyBloc>().add(SubmitEvent())),
+      child: Text("Submit"),
+    );
+  },
+)
+```
+
+**Provider:**
+```dart
+ThrottledInkWell(
+  onTap: () => context.read<CounterProvider>().increment(),
+  child: Text("Increment"),
+)
+```
+
+[See more state management examples →](docs/faq.md#state-management)
+
+---
+
+## ⚡ Performance
+
+Near-zero overhead:
+
+| Metric | Performance |
+|--------|------------|
+| Throttle/Debounce | ~0.01ms per call |
+| High-Frequency Throttler | ~0.001ms (100x faster) |
+| Memory | ~40 bytes per controller |
+
+**Benchmarked:** Handles 1000+ concurrent operations without frame drops.
+
+[See performance benchmarks →](docs/guides/performance.md)
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please feel free to check the issues or submit a PR.
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new features
+4. Submit a pull request
 
-- **Bugs:** Open an issue with a reproduction sample.
-- **Features:** Discuss new features in issues before implementing.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -746,9 +452,9 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 📮 Support
 
-- 📧 **Issues:** [GitHub Issues](https://github.com/vietnguyentuan2019/flutter_event_limiter/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/vietnguyentuan2019/flutter_event_limiter/discussions)
-- ⭐ **Star this repo** if you find it useful!
+- 💬 **Questions:** [FAQ](docs/faq.md) · [GitHub Discussions](https://github.com/vietnguyentuan2019/flutter_event_limiter/discussions)
+- 🐛 **Bugs:** [GitHub Issues](https://github.com/vietnguyentuan2019/flutter_event_limiter/issues)
+- ⭐ **Like it?** Star this repo!
 
 ---
 
