@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'callback_controller.dart';
+import 'concurrency_mode.dart';
 
 /// QUICK START:
 ///
@@ -804,6 +805,225 @@ class _AsyncThrottledCallbackBuilderState
       context,
       widget.onPressed == null ? null : _handlePress,
       _isLoading,
+    );
+  }
+}
+
+/// Advanced async throttled callback builder with concurrency control.
+///
+/// **NEW in v1.2.0:** Adds concurrency modes for handling multiple async operations.
+///
+/// **Features:**
+/// - **Auto loading state** - Tracks execution automatically
+/// - **Concurrency modes** - drop, enqueue, replace, keepLatest
+/// - **Queue size tracking** - Display pending operations count
+/// - **Error handling** - onError callback with stack trace
+/// - **Auto-dispose** - No manual cleanup needed
+/// - **Mounted checks** - Safe setState after async operations
+///
+/// **Use cases:**
+/// - Chat app: `enqueue` mode to send messages in order
+/// - Search: `replace` mode to cancel old queries
+/// - Auto-save: `keepLatest` mode to save final version after edits
+/// - Payment: `drop` mode (default) to prevent duplicate charges
+///
+/// **Example: Chat Message Sender (Enqueue Mode)**
+/// ```dart
+/// ConcurrentAsyncThrottledBuilder(
+///   mode: ConcurrencyMode.enqueue,
+///   maxDuration: Duration(seconds: 30),
+///   onPressed: () async {
+///     await api.sendMessage(_messageController.text);
+///     _messageController.clear();
+///   },
+///   onError: (error, stack) {
+///     showSnackBar('Failed to send: $error');
+///   },
+///   builder: (context, callback, isLoading, pendingCount) {
+///     return Column(
+///       children: [
+///         if (pendingCount > 0)
+///           Text('Sending ${pendingCount} messages...'),
+///         ElevatedButton(
+///           onPressed: isLoading ? null : callback,
+///           child: isLoading
+///             ? CircularProgressIndicator()
+///             : Text('Send'),
+///         ),
+///       ],
+///     );
+///   },
+/// )
+/// ```
+///
+/// **Example: Search with Replace Mode**
+/// ```dart
+/// ConcurrentAsyncThrottledBuilder(
+///   mode: ConcurrencyMode.replace,
+///   maxDuration: Duration(seconds: 10),
+///   onPressed: () async {
+///     final results = await api.search(_searchQuery);
+///     setState(() => _results = results);
+///   },
+///   builder: (context, callback, isLoading, _) {
+///     return SearchBar(
+///       onChanged: (query) {
+///         _searchQuery = query;
+///         callback?.call(); // Replaces previous search
+///       },
+///       trailing: isLoading ? CircularProgressIndicator() : null,
+///     );
+///   },
+/// )
+/// ```
+///
+/// **Example: Auto-save with Keep Latest Mode**
+/// ```dart
+/// ConcurrentAsyncThrottledBuilder(
+///   mode: ConcurrencyMode.keepLatest,
+///   maxDuration: Duration(seconds: 30),
+///   onPressed: () async {
+///     await api.saveDraft(_draftContent);
+///   },
+///   onSuccess: () => showSnackBar('Draft saved'),
+///   builder: (context, callback, isLoading, _) {
+///     return TextField(
+///       onChanged: (text) {
+///         _draftContent = text;
+///         callback?.call(); // Keeps latest version
+///       },
+///       decoration: InputDecoration(
+///         suffixIcon: isLoading
+///           ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator())
+///           : Icon(Icons.check, color: Colors.green),
+///       ),
+///     );
+///   },
+/// )
+/// ```
+class ConcurrentAsyncThrottledBuilder extends StatefulWidget {
+  /// Concurrency mode for handling multiple async operations.
+  final ConcurrencyMode mode;
+
+  /// Async callback to execute. Context operations are auto-protected with mounted check.
+  final Future<void> Function()? onPressed;
+
+  /// Called when onPressed throws an error. Runs even if widget is unmounted.
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
+  /// Optional callback when operation completes successfully.
+  final VoidCallback? onSuccess;
+
+  /// Max duration before auto-unlock (default 15s). Use longer for file uploads.
+  final Duration? maxDuration;
+
+  /// Enable debug logging for troubleshooting.
+  final bool debugMode;
+
+  /// Name for debug logging (e.g., 'chat-sender', 'search-api').
+  final String? name;
+
+  /// Builder receives current loading state and pending operations count.
+  ///
+  /// **Parameters:**
+  /// - `context`: BuildContext
+  /// - `callback`: VoidCallback? to trigger the async operation
+  /// - `isLoading`: bool indicating if operation is currently executing
+  /// - `pendingCount`: int number of pending operations (enqueue/keepLatest modes)
+  final Widget Function(
+    BuildContext context,
+    VoidCallback? callback,
+    bool isLoading,
+    int pendingCount,
+  ) builder;
+
+  const ConcurrentAsyncThrottledBuilder({
+    super.key,
+    this.mode = ConcurrencyMode.drop,
+    required this.onPressed,
+    required this.builder,
+    this.onError,
+    this.onSuccess,
+    this.maxDuration,
+    this.debugMode = false,
+    this.name,
+  });
+
+  @override
+  State<ConcurrentAsyncThrottledBuilder> createState() =>
+      _ConcurrentAsyncThrottledBuilderState();
+}
+
+class _ConcurrentAsyncThrottledBuilderState
+    extends State<ConcurrentAsyncThrottledBuilder> {
+  late final ConcurrentAsyncThrottler _throttler;
+  bool _isLoading = false;
+  int _pendingCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _throttler = ConcurrentAsyncThrottler(
+      mode: widget.mode,
+      maxDuration: widget.maxDuration,
+      debugMode: widget.debugMode,
+      name: widget.name,
+    );
+  }
+
+  @override
+  void dispose() {
+    _throttler.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handlePress() async {
+    if (widget.onPressed == null) return;
+
+    // Update loading state
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _pendingCount = _throttler.pendingCount;
+      });
+    }
+
+    try {
+      await _throttler.call(() async {
+        await widget.onPressed!();
+      });
+
+      // Safe setState - only update if still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = _throttler.isLocked;
+          _pendingCount = _throttler.pendingCount;
+        });
+      }
+
+      // Call onSuccess even if unmounted (e.g., for analytics)
+      widget.onSuccess?.call();
+    } catch (error, stackTrace) {
+      // Safe setState - only update if still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = _throttler.isLocked;
+          _pendingCount = _throttler.pendingCount;
+        });
+      }
+
+      // Call error handler even if unmounted
+      widget.onError?.call(error, stackTrace);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      widget.onPressed == null ? null : _handlePress,
+      _isLoading,
+      _pendingCount,
     );
   }
 }

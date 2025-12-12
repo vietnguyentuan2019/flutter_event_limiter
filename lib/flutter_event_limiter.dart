@@ -42,3 +42,6 @@ export 'src/callback_controller.dart';
 
 // Widgets and builders (recommended usage)
 export 'src/callback_widgets.dart';
+
+// Concurrency modes (v1.2.0+)
+export 'src/concurrency_mode.dart';

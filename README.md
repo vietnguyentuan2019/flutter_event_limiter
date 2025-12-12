@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_event_limiter.svg)](https://pub.dev/packages/flutter_event_limiter)
 [![Pub Points](https://img.shields.io/pub/points/flutter_event_limiter)](https://pub.dev/packages/flutter_event_limiter/score)
-[![Tests](https://img.shields.io/badge/tests-95%20passing-brightgreen.svg)](https://github.com/vietnguyentuan2019/flutter_event_limiter)
+[![Tests](https://img.shields.io/badge/tests-128%20passing-brightgreen.svg)](https://github.com/vietnguyentuan2019/flutter_event_limiter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Production-ready throttle and debounce for Flutter apps.**
@@ -58,7 +58,7 @@ AsyncDebouncedTextController(
 
 **Built for production use:**
 - ✅ **160/160 pub points** - Perfect score, actively maintained
-- ✅ **95 comprehensive tests** - Edge cases covered, battle-tested
+- ✅ **128 comprehensive tests** - Edge cases covered, battle-tested
 - ✅ **Zero dependencies** - No bloat, no conflicts
 
 **Saves development time:**
@@ -116,6 +116,58 @@ AsyncThrottledCallbackBuilder(
 ```
 
 [See Form example →](docs/examples/form-submission.md)
+
+### 4. Advanced Concurrency Control (NEW in v1.2.0)
+
+Control how multiple async operations are handled with 4 powerful modes:
+
+```dart
+// Chat App: Queue messages and send in order
+ConcurrentAsyncThrottledBuilder(
+  mode: ConcurrencyMode.enqueue,
+  onPressed: () async => await api.sendMessage(text),
+  builder: (context, callback, isLoading, pendingCount) {
+    return ElevatedButton(
+      onPressed: callback,
+      child: Text(pendingCount > 0 ? 'Sending ($pendingCount)...' : 'Send'),
+    );
+  },
+)
+
+// Search: Cancel old queries, only run latest
+ConcurrentAsyncThrottledBuilder(
+  mode: ConcurrencyMode.replace,
+  onPressed: () async => await api.search(query),
+  builder: (context, callback, isLoading, _) {
+    return SearchBar(
+      onChanged: (q) { query = q; callback?.call(); },
+      trailing: isLoading ? CircularProgressIndicator() : null,
+    );
+  },
+)
+
+// Auto-save: Save current + latest only
+ConcurrentAsyncThrottledBuilder(
+  mode: ConcurrencyMode.keepLatest,
+  onPressed: () async => await api.saveDraft(content),
+  builder: (context, callback, isLoading, _) {
+    return TextField(
+      onChanged: (text) { content = text; callback?.call(); },
+      decoration: InputDecoration(
+        suffixIcon: isLoading ? CircularProgressIndicator() : Icon(Icons.check),
+      ),
+    );
+  },
+)
+```
+
+**4 Concurrency Modes:**
+- 🔴 **Drop** (default): Ignore new calls while busy - perfect for preventing double-clicks
+- 📤 **Enqueue**: Queue all calls and execute sequentially - perfect for chat apps
+- 🔄 **Replace**: Cancel current and start new - perfect for search queries
+- 💾 **Keep Latest**: Execute current + latest only - perfect for auto-save
+
+[See interactive demo →](example/concurrency_demo.dart)
 
 ---
 

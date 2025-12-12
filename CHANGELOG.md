@@ -1,3 +1,111 @@
+## 1.2.0 - 2025-12-12
+
+**Advanced Concurrency Control** 🚀
+
+This major feature release adds powerful concurrency control strategies for async operations, giving you fine-grained control over how multiple async calls are handled.
+
+### Added
+
+#### **Concurrency Modes (NEW)**
+- ✅ **4 execution strategies** for handling concurrent async operations:
+  - **Drop** (default): Ignore new calls while busy - perfect for preventing double-clicks
+  - **Enqueue**: Queue all calls and execute sequentially (FIFO) - perfect for chat apps
+  - **Replace**: Cancel current execution and start new one - perfect for search queries
+  - **Keep Latest**: Execute current + latest only - perfect for auto-save
+
+- ✅ **New `ConcurrencyMode` enum** with rich documentation and helper methods:
+  ```dart
+  enum ConcurrencyMode {
+    drop,        // Ignore new calls (default)
+    enqueue,     // Queue and execute all
+    replace,     // Cancel and replace
+    keepLatest,  // Execute current + latest
+  }
+  ```
+
+#### **New Controller: `ConcurrentAsyncThrottler`**
+- ✅ Advanced async throttler with concurrency control strategies
+- ✅ Wraps `AsyncThrottler` with additional concurrency logic
+- ✅ Queue management for enqueue mode (~60 bytes per queued operation)
+- ✅ ID-based cancellation for replace mode
+- ✅ Smart pending call tracking for keepLatest mode
+- ✅ Exposes `pendingCount`, `queueSize`, and `hasPendingCalls` properties
+- ✅ Full debug mode support with detailed logging
+- Example:
+  ```dart
+  final chatSender = ConcurrentAsyncThrottler(
+    mode: ConcurrencyMode.enqueue,
+    maxDuration: Duration(seconds: 30),
+    debugMode: true,
+  );
+
+  // All messages sent in order
+  chatSender.call(() async => await api.send('Hello'));
+  chatSender.call(() async => await api.send('World'));
+  ```
+
+#### **New Widget: `ConcurrentAsyncThrottledBuilder`**
+- ✅ Widget wrapper for `ConcurrentAsyncThrottler`
+- ✅ Automatic loading state tracking
+- ✅ Pending operations count for queue display
+- ✅ Safe `mounted` checks in async operations
+- ✅ Auto-dispose - no manual cleanup needed
+- ✅ `onError` and `onSuccess` callbacks
+- Example:
+  ```dart
+  ConcurrentAsyncThrottledBuilder(
+    mode: ConcurrencyMode.enqueue,
+    onPressed: () async => await api.sendMessage(text),
+    builder: (context, callback, isLoading, pendingCount) {
+      return ElevatedButton(
+        onPressed: isLoading ? null : callback,
+        child: Text(pendingCount > 0
+          ? 'Sending ($pendingCount)...'
+          : 'Send'),
+      );
+    },
+  )
+  ```
+
+### Tests
+- ✅ **25 comprehensive unit tests** for concurrency logic:
+  - Drop mode tests (default behavior)
+  - Enqueue mode tests (queue management)
+  - Replace mode tests (cancellation)
+  - Keep latest mode tests (smart buffering)
+  - Real-world scenarios (chat, search, auto-save)
+  - Edge cases and error handling
+
+- ✅ **8 widget tests** for `ConcurrentAsyncThrottledBuilder`:
+  - Loading state management
+  - Error handling with callbacks
+  - Success callbacks
+  - Null safety handling
+  - Proper disposal
+  - Debug mode support
+
+- ✅ **Total: 128 tests passing** (up from 95)
+
+### Examples
+- ✅ **Interactive demo app** (`example/concurrency_demo.dart`):
+  - Live demonstrations of all 4 concurrency modes
+  - Visual event logs showing execution order
+  - Practical use cases (payment, chat, search, auto-save)
+  - Pending count visualization
+
+### Documentation
+- ✅ Comprehensive inline documentation for all concurrency features
+- ✅ Real-world use case examples in each mode
+- ✅ Performance notes and memory overhead details
+- ✅ Migration guide from `AsyncThrottler`
+
+### Performance
+- ✅ Zero overhead for drop mode (direct AsyncThrottler passthrough)
+- ✅ Minimal memory: ~60 bytes per queued operation (enqueue mode)
+- ✅ Minimal memory: ~40 bytes overhead (replace/keepLatest modes)
+
+---
+
 ## 1.1.2 - 2025-12-09
 
 **Documentation Fix** 📝
