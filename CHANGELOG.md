@@ -1,3 +1,25 @@
+## 1.2.1 - 2025-12-12
+
+**Topics Optimization** 🏷️
+
+### Changed
+- ✅ **Optimized pub.dev topics for better discoverability**
+  - Replaced generic topics (`performance`, `widget`, `button`) with specific pain points
+  - Added problem-focused keywords: `anti-spam`, `race-condition`, `loading-state`
+  - Added use-case keywords: `async`, `form`, `search`
+  - Better alignment with user search intent and common problems
+
+**New topics (max 5 on pub.dev):**
+1. `throttle` - Core function
+2. `debounce` - Core function
+3. `anti-spam` - Pain point: prevent double-clicks
+4. `async` - Feature: AsyncThrottler, async operations
+5. `loading-state` - Unique: auto loading state management
+
+This improves package visibility for developers searching for solutions to specific problems like preventing double-clicks, fixing race conditions, or handling loading states.
+
+---
+
 ## 1.2.0 - 2025-12-12
 
 **Advanced Concurrency Control** 🚀

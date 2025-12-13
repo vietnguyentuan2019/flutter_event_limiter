@@ -2,17 +2,17 @@ name: flutter_event_limiter
 description: >-
   Throttle and debounce for Flutter. Prevent double-clicks, race conditions, memory leaks.
   Universal Builders for ANY widget with automatic loading states.
-version: 1.2.0
+version: 1.2.1
 homepage: https://github.com/vietnguyentuan2019/flutter_event_limiter
 repository: https://github.com/vietnguyentuan2019/flutter_event_limiter
 issue_tracker: https://github.com/vietnguyentuan2019/flutter_event_limiter/issues
 
 topics:
-  - throttle
-  - debounce
-  - performance
-  - widget
-  - button
+  - throttle        # Core function
+  - debounce        # Core function
+  - anti-spam       # Pain point: prevent double-clicks
+  - async           # Feature: AsyncThrottler, async operations
+  - loading-state   # Unique: auto loading state management
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
